@@ -5,7 +5,7 @@ import { supabase } from './api/supabase'
 
 function App() {
   const [clients, setClients] = useState<Client[]>([])
-  const [editingClient, setEditingClient] = useState<Client | null>(null)
+  const [selectedClient, setSelectedClient] = useState<Client | undefined>(undefined)
 
   useEffect(() => {
     fetchClients()
@@ -40,19 +40,19 @@ function App() {
   }
 
   const handleUpdate = async (data: ClientInput) => {
-    if (!editingClient) return
+    if (!selectedClient) return
 
     const { error } = await supabase
       .from('clients')
       .update(data)
-      .eq('id', editingClient.id)
+      .eq('id', selectedClient.id)
 
     if (error) {
       console.error('Error updating client:', error)
       return
     }
 
-    setEditingClient(null)
+    setSelectedClient(undefined)
     fetchClients()
   }
 
@@ -83,15 +83,15 @@ function App() {
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                {editingClient ? '取引先を編集' : '新規登録'}
+                {selectedClient ? '取引先を編集' : '新規登録'}
               </h2>
               <ClientForm
-                onSubmit={editingClient ? handleUpdate : handleCreate}
-                initialData={editingClient}
+                onSubmit={selectedClient ? handleUpdate : handleCreate}
+                initialData={selectedClient}
               />
-              {editingClient && (
+              {selectedClient && (
                 <button
-                  onClick={() => setEditingClient(null)}
+                  onClick={() => setSelectedClient(undefined)}
                   className="mt-4 text-sm text-gray-500 hover:text-gray-700"
                 >
                   キャンセルして新規登録に戻る
@@ -122,7 +122,7 @@ function App() {
                     </div>
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => setEditingClient(client)}
+                        onClick={() => setSelectedClient(client)}
                         className="text-sm text-blue-600 hover:text-blue-800"
                       >
                         編集
